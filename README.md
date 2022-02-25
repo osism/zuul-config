@@ -1,4 +1,4 @@
-# Zuu config repository
+# Zuul config repository
 
 In this repository you'll find the core configuration for the zuul server.
 

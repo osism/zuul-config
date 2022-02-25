@@ -1,6 +1,18 @@
 ---
 - project:
-    name: ^tibeerorg.*$
+    name: ^osfrickler.*$
+    default-branch: main
+    gh_check:
+      jobs: []
+    gh_gate:
+      jobs: []
+    gh_post:
+      jobs: []
+    gh_tag:
+      jobs: []
+
+- project:
+    name: ^osism.*$
     default-branch: main
     gh_check:
       jobs: []
@@ -16,7 +28,7 @@
     default-branch: master
 
 - project:
-    name: tibeerorg/zuul_config
+    name: osism/zuul_config
     default-branch: main
     gh_check:
       jobs:
