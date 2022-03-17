@@ -17,7 +17,7 @@
           comment: (?i)^\s*recheck\s*$
         - event: check_run
           action: rerequested
-          check: .*/check:.*
+          check: .*/gh_check:.*
     start:
       github:
         check: 'in_progress'
