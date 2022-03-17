@@ -1,6 +1,6 @@
 ---
 - pipeline:
-    name: gh_check
+    name: check
     description: |
       Newly opened pull requests enter this pipeline to receive an
       initial check status.
@@ -17,7 +17,7 @@
           comment: (?i)^\s*recheck\s*$
         - event: check_run
           action: rerequested
-          check: .*/gh_check:.*
+          check: .*/check:.*
     start:
       github:
         check: 'in_progress'
@@ -36,14 +36,14 @@
         comment: false
 
 - pipeline:
-    name: gh_gate
+    name: gate
     description: |
       Changes that have been approved by core developers are enqueued
       in order in this pipeline, and if they pass tests, will be
       merged.
     manager: dependent
     precedence: high
-    supercedes: gh_check
+    supercedes: check
     require:
       github:
         review:
@@ -94,7 +94,7 @@
     window-increase-factor: 2
 
 - pipeline:
-    name: gh_post
+    name: post
     post-review: true
     description:
       This pipeline runs jobs that operate after each change is merged.
@@ -106,7 +106,7 @@
           ref: ^refs/heads/.*$
 
 - pipeline:
-    name: gh_tag
+    name: tag
     description: This pipeline runs jobs in response to any tag event.
     manager: independent
     precedence: high
