@@ -1,5 +1,7 @@
 ---
 - hosts: all
   roles:
+    - emit-job-header
+    - log-inventory
     - add-build-sshkey
     - prepare-workspace
