@@ -1,6 +1,4 @@
 ---
 - hosts: all
   roles:
-    - fetch-output
-    - merge-output-to-logs
     - remove-build-sshkey
