@@ -19,8 +19,8 @@
     timeout: 1800
     nodeset:
       nodes:
-        - name: ubuntu-focal
-          label: ubuntu-focal
+        - name: ubuntu-jammy
+          label: ubuntu-jammy
 - job:
     name: base-extra-logs
     parent: base
