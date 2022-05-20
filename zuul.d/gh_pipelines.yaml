@@ -100,6 +100,9 @@
       This pipeline runs jobs that operate after each change is merged.
     manager: independent
     precedence: low
+    require:
+      github:
+        merged: true
     trigger:
       github:
         - event: push
