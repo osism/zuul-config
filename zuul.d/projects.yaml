@@ -28,7 +28,7 @@
     default-branch: master
 
 - project:
-    name: osism/zuul_config
+    name: osism/zuul-config
     default-branch: main
     check:
       jobs:
