@@ -46,9 +46,9 @@
     supercedes: check
     require:
       github:
-        review:
-          - permission: write
-            type: approved
+        # review:
+        #   - permission: write
+        #     type: approved
         label: gate
         open: true
         current-patchset: true
