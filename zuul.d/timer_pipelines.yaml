@@ -2,6 +2,7 @@
 - pipeline:
     name: periodic-hourly
     description: This pipeline runs hourly at the mid of an hour.
+    post-review: true
     manager: independent
     precedence: low
     trigger:
@@ -11,6 +12,7 @@
 - pipeline:
     name: periodic-daily
     description: This pipeline runs jobs daily at 3am.
+    post-review: true
     manager: independent
     precedence: low
     trigger:
