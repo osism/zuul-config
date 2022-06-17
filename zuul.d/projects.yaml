@@ -10,6 +10,10 @@
       jobs: []
     tag:
       jobs: []
+    periodic-hourly:
+      jobs: []
+    periodic-daily:
+      jobs: []
 
 - project:
     name: ^osism.*$
@@ -21,6 +25,10 @@
     post:
       jobs: []
     tag:
+      jobs: []
+    periodic-hourly:
+      jobs: []
+    periodic-daily:
       jobs: []
 
 - project:
