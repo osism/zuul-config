@@ -39,5 +39,5 @@
     secrets:
       - name: rclone_conf
         secret: osism_staging_docs_rclone_conf
-    pre-run: playbooks/pre-publish.yaml
-    post-run: playbooks/publish-docs.yaml
+    pre-run: playbooks/publishing/pre-publish.yaml
+    post-run: playbooks/publishing/publish-docs.yaml
