@@ -31,3 +31,13 @@
       docs and artifacts from all nodes.
     post-run:
       - playbooks/base/post-fetch.yaml
+
+- job:
+    name: osism-publish-tox-docs-staging
+    parent: tox-docs
+    final: true
+    secrets:
+      - name: rclone_conf
+        secret: osism_staging_docs_rclone_conf
+    pre-run: playbooks/pre-publish.yaml
+    post-run: playbooks/publish-docs.yaml
