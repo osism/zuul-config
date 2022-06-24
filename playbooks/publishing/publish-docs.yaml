@@ -1,5 +1,7 @@
 ---
 - hosts: all
+  vars:
+    sphinx_build_dir: "doc/build"
   tasks:
     - name: create rclone config dir
       ansible.builtin.file:
