@@ -1,33 +1,5 @@
 ---
 - project:
-    name: ^osfrickler.*$
-    default-branch: main
-    check:
-      jobs: []
-    gate:
-      jobs: []
-    post:
-      jobs: []
-    tag:
-      jobs: []
-
-- project:
-    name: ^osism.*$
-    default-branch: main
-    check:
-      jobs: []
-    gate:
-      jobs: []
-    post:
-      jobs: []
-    tag:
-      jobs: []
-
-- project:
-    name: zuul/zuul-jobs
-    default-branch: master
-
-- project:
     name: osism/zuul-config
     default-branch: main
     check:
