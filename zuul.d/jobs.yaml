@@ -45,8 +45,6 @@
     secrets:
       - name: rclone_conf
         secret: osism_production_docs_rclone_conf
-    vars:
-      docs_publish_prefix: "osism/"
     pre-run: playbooks/publishing/pre-publish.yaml
     post-run: playbooks/publishing/publish-docs.yaml
 
