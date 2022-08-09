@@ -1,7 +1,6 @@
 ---
 - hosts: all
   vars:
-    docs_publish_prefix: ""
     sphinx_build_dir: "doc/build"
   tasks:
     - name: create rclone config dir
@@ -18,7 +17,7 @@
       no_log: true
     - name: run rclone
       ansible.builtin.shell: |
-        rclone -v copy {{ sphinx_build_dir }}/html doc:{{ docs_publish_prefix }}{{ zuul.project.short_name }}/
+        rclone -v copy {{ sphinx_build_dir }}/html doc:{{ zuul.project.short_name }}/
       args:
         chdir: "{{ zuul.project.src_dir }}"
       changed_when: true
