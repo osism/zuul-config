@@ -18,7 +18,7 @@
       no_log: true
     - name: run rclone
       ansible.builtin.shell: |
-        rclone copy {{ sphinx_build_dir }}/html doc:{{ docs_publish_prefix }}{{ zuul.project.short_name }}/
+        rclone -v copy {{ sphinx_build_dir }}/html doc:{{ docs_publish_prefix }}{{ zuul.project.short_name }}/
       args:
         chdir: "{{ zuul.project.src_dir }}"
       changed_when: true
