@@ -4,4 +4,5 @@
     - emit-job-header
     - log-inventory
     - add-build-sshkey
+    - start-zuul-console
     - prepare-workspace
