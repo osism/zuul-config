@@ -4,10 +4,10 @@
     default-branch: main
     check:
       jobs:
-        - ansible-lint
+        - dco-license
     gate:
       jobs:
-        - ansible-lint
+        - dco-license
     post:
       jobs:
         - noop
