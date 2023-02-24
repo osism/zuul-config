@@ -1,4 +1,6 @@
 ---
+exclude_paths:
+  - .github/
 use_default_rules: true
 rulesdir:
   - ./.ansible-lint-rules/
