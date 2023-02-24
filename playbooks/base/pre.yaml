@@ -6,3 +6,4 @@
     - add-build-sshkey
     - start-zuul-console
     - prepare-workspace
+    - validate-dco-license
