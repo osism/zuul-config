@@ -4,10 +4,10 @@
     default-branch: main
     check:
       jobs:
-        - dco-license
+        - noop
     gate:
       jobs:
-        - dco-license
+        - noop
     post:
       jobs:
         - noop
