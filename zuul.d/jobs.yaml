@@ -32,34 +32,34 @@
     post-run:
       - playbooks/base/post-fetch.yaml
 
-- job:
-    name: osism-publish-tox-docs-production
-    parent: tox-docs
-    final: true
-    description: |
-      Build documentation and publish to production.
-
-      This job should be used in the post pipeline for projects that
-      create documentation. It runs the tox-docs build and then
-      publishes the result to docs.osism.tech/{project}/.
-    secrets:
-      - name: rclone_conf
-        secret: osism_production_docs_rclone_conf
-    pre-run: playbooks/publishing/pre-publish.yaml
-    post-run: playbooks/publishing/publish-docs.yaml
-
-- job:
-    name: osism-publish-tox-docs-staging
-    parent: tox-docs
-    final: true
-    description: |
-      Build documentation and publish to staging.
-
-      This job should be used in the post pipeline for projects that
-      create documentation. It runs the tox-docs build and then
-      publishes the result to docs.staging.osism.tech/{project}/.
-    secrets:
-      - name: rclone_conf
-        secret: osism_staging_docs_rclone_conf
-    pre-run: playbooks/publishing/pre-publish.yaml
-    post-run: playbooks/publishing/publish-docs.yaml
+        #- job:
+        #    name: osism-publish-tox-docs-production
+        #    parent: tox-docs
+        #    final: true
+        #    description: |
+        #      Build documentation and publish to production.
+        #
+        #      This job should be used in the post pipeline for projects that
+        #      create documentation. It runs the tox-docs build and then
+        #      publishes the result to docs.osism.tech/{project}/.
+        #    secrets:
+        #      - name: rclone_conf
+        #        secret: osism_production_docs_rclone_conf
+        #    pre-run: playbooks/publishing/pre-publish.yaml
+        #    post-run: playbooks/publishing/publish-docs.yaml
+        #
+        #- job:
+        #    name: osism-publish-tox-docs-staging
+        #    parent: tox-docs
+        #    final: true
+        #    description: |
+        #      Build documentation and publish to staging.
+        #
+        #      This job should be used in the post pipeline for projects that
+        #      create documentation. It runs the tox-docs build and then
+        #      publishes the result to docs.staging.osism.tech/{project}/.
+        #    secrets:
+        #      - name: rclone_conf
+        #        secret: osism_staging_docs_rclone_conf
+        #    pre-run: playbooks/publishing/pre-publish.yaml
+        #    post-run: playbooks/publishing/publish-docs.yaml
