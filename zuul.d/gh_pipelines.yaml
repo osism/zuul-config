@@ -6,7 +6,7 @@
       initial check status.
     manager: independent
     trigger:
-      github:
+      githubzuulapp:
         - event: pull_request
           action:
             - opened
@@ -19,19 +19,19 @@
           action: rerequested
           check: .*/check:.*
     start:
-      github:
+      githubzuulapp:
         check: 'in_progress'
         comment: false
     success:
-      github:
+      githubzuulapp:
         check: 'success'
         comment: false
     failure:
-      github:
+      githubzuulapp:
         check: 'failure'
         comment: false
     dequeue:
-      github:
+      githubzuulapp:
         check: cancelled
         comment: false
 
@@ -45,7 +45,7 @@
     precedence: high
     supercedes: check
     require:
-      github:
+      githubzuulapp:
         # review:
         #   - permission: write
         #     type: approved
@@ -53,7 +53,7 @@
         open: true
         current-patchset: true
     trigger:
-      github:
+      githubzuulapp:
         - event: pull_request_review
           action: submitted
           state: approved
@@ -74,20 +74,20 @@
           label:
             - gate
     start:
-      github:
+      githubzuulapp:
         check: 'in_progress'
         comment: false
     success:
-      github:
+      githubzuulapp:
         check: 'success'
         comment: false
         merge: true
     failure:
-      github:
+      githubzuulapp:
         check: 'failure'
         comment: false
     dequeue:
-      github:
+      githubzuulapp:
         check: cancelled
         comment: false
     window-floor: 20
@@ -101,7 +101,7 @@
     manager: independent
     precedence: low
     trigger:
-      github:
+      githubzuulapp:
         - event: push
           ref: ^refs/heads/.*$
 
@@ -112,6 +112,6 @@
     precedence: high
     post-review: true
     trigger:
-      github:
+      githubzuulapp:
         - event: push
           ref: ^refs/tags/.*$
