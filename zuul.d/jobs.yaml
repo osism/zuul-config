@@ -32,7 +32,7 @@
     post-run:
       - playbooks/base/post-fetch.yaml
 
-- jobs:
+- job:
     name: otc-tox-linters  
     parent: base-extra-logs
 
