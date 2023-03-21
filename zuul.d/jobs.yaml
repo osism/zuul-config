@@ -32,6 +32,10 @@
     post-run:
       - playbooks/base/post-fetch.yaml
 
+- jobs:
+    name: otc-tox-linters  
+    parent: base-extra-logs
+
         #- job:
         #    name: osism-publish-tox-docs-production
         #    parent: tox-docs
