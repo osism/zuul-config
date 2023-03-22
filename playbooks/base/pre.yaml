@@ -5,4 +5,5 @@
     - log-inventory
     - add-build-sshkey
     - start-zuul-console
+    - validate-host
     - prepare-workspace
