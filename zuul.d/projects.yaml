@@ -2,7 +2,7 @@
 - project:
     name: master-caster/zuul-config
     default-branch: main
-    merge-mode: "merge"
+    merge-mode: "squash-merge"
     check:
       jobs:
         - noop
