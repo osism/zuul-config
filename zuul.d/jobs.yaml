@@ -34,7 +34,7 @@
 
 - job:
     name: otc-tox-linters  
-    parent: base-extra-logs
+    parent: tox-linters
 
         #- job:
         #    name: osism-publish-tox-docs-production
