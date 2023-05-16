@@ -1,0 +1,6 @@
+---
+- hosts: all
+  tasks:
+    - name: check flavor names
+      ansible.builtin.debug:
+        msg: "My first own job"

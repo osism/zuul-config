@@ -33,6 +33,16 @@
       - playbooks/base/post-fetch.yaml
 
 - job:
+    name: openstack-scs-flavor-check
+    parent: base-extra-logs
+    description: |
+      A job to check if a IaaS provider is SCS compliance in
+      terms of flavor names
+    timeout: 1500
+    run: playbooks/openstack-compliance-checks/flavor-check.yaml
+    
+
+- job:
     name: otc-tox-linters  
     parent: tox-linters
 
