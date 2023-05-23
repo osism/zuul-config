@@ -34,11 +34,13 @@
 
 - job:
     name: openstack-scs-flavor-check
-    parent: base-extra-logs
+    parent: base
     description: |
       A job to check if a IaaS provider is SCS compliance in
       terms of flavor names
-    timeout: 1500
+    secrets:
+      - name: clouds_conf
+        secret: app_credential_cloud_conf
     run: playbooks/openstack-compliance-checks/flavor-check.yaml
     
 

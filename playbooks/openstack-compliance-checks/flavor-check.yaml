@@ -1,6 +1,27 @@
 ---
 - hosts: all
   tasks:
-    - name: check flavor names
+    - name: Create cloud config dir
+      ansible.builtin.file:
+        path: "~/.config/openstack"
+        state: directory
+        recurse: true
+        mode: "0700"
+
+    - name: Create cloud config file
+      ansible.builtin.copy:
+        content: "{{ clouds_conf.credentials }}"
+        dest: "~/.config/openstack/clouds.yaml"
+        mode: "0600"
+      no_log: true
+
+    - name: List compute flavors
+      openstack.cloud.resources:
+        cloud: devstack-admin
+        service: compute
+        type: flavor
+      register: flavors
+
+    - name: Print return information from the previous task
       ansible.builtin.debug:
-        msg: "My first own job"
+        var: flavors
