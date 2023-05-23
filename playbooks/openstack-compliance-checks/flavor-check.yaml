@@ -1,11 +1,6 @@
 ---
 - hosts: all
   tasks:
-    - name: Install collection openstack.cloud
-      community.general.ansible_galaxy_install:
-        type: collection
-        name: community.cloud
-
     - name: Create cloud config dir
       ansible.builtin.file:
         path: "~/.config/openstack"
