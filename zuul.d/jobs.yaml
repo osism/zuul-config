@@ -41,6 +41,7 @@
     secrets:
       - name: clouds_conf
         secret: app_credential_cloud_conf
+    pre-run: playbooks/openstack-compliance-checks/pre-flavor-check.yaml
     run: playbooks/openstack-compliance-checks/flavor-check.yaml
     
 
