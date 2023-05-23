@@ -1,6 +1,11 @@
 ---
 - hosts: all
   tasks:
+    - name: Install ansible-galaxy
+      become: true
+      ansible.builtin.pip:
+        name: ansible
+
     - name: Install collection openstack.cloud
       become: true
       community.general.ansible_galaxy_install:
