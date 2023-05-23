@@ -3,8 +3,9 @@
   tasks:
     - name: Install ansible-galaxy
       become: true
-      ansible.builtin.pip:
+      ansible.builtin.apt:
         name: ansible
+        state: present
 
     - name: Install collection openstack.cloud
       become: true
