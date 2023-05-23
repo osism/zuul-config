@@ -5,6 +5,7 @@
       become: true
       ansible.builtin.apt:
         name: ansible
+        update_cache: yes
         state: present
 
     - name: Install collection openstack.cloud
