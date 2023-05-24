@@ -38,6 +38,5 @@
         cloud: wavestack
       register: flavors
 
-    - name: Print return information from the previous task
-      ansible.builtin.debug:
-        var: flavors
+    - debug:
+      msg: "{{ flavors.openstack_flavors }}"
