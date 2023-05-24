@@ -35,7 +35,7 @@
 
     - name: List compute flavors
       openstack.cloud.resources:
-        cloud: devstack-admin
+        cloud: wavestack
         service: compute
         type: flavor
       register: flavors
