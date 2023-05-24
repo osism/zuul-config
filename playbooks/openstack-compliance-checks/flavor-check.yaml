@@ -19,10 +19,6 @@
         type: collection
         name: openstack.cloud
 
-- hosts: all
-  collections:
-    - openstack.cloud
-  tasks:
     - name: Create cloud config dir
       ansible.builtin.file:
         path: "~/.config/openstack"
@@ -38,7 +34,7 @@
       no_log: true
 
     - name: List compute flavors
-      resources:
+      openstack.cloud.resources:
         cloud: devstack-admin
         service: compute
         type: flavor
