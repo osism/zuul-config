@@ -1,5 +1,6 @@
 ---
 - hosts: all
+  debugger: always
   tasks:
     - name: Install ansible-galaxy
       become: true
