@@ -19,7 +19,6 @@
         type: collection
         name: openstack.cloud
 
----
 - hosts: all
   collections:
     - openstack.cloud
