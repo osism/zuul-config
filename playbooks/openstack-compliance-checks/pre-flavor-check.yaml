@@ -9,7 +9,6 @@
         state: present
 
     - name: Install collection openstack.cloud
-      become: true
       community.general.ansible_galaxy_install:
         type: collection
         name: openstack.cloud
