@@ -1,6 +1,5 @@
 ---
 - hosts: all
-  debugger: always
   tasks:
     - name: Install ansible-galaxy
       become: true
@@ -34,12 +33,9 @@
         mode: "0600"
       no_log: true
 
-    - name: List compute flavors
-      openstack.cloud.compute_flavor_info:
-        cloud: wavestack
-      register: flavors
+    # Gather information about all available flavors
+    - openstack.cloud.compute_flavor_info:
+      register: result
 
-    - name: Print return information from the previous task
-      ansible.builtin.debug:
-        var: flavors.openstack_flavors
-        verbosity: 4
+    - debug:
+        msg: "{{ result.openstack_flavors }}"
