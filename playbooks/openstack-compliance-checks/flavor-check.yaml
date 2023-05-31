@@ -38,4 +38,4 @@
       register: result
 
     - debug:
-        msg: "{{ result.openstack_flavors }}"
+        msg: "{{ result.stdout }}"
