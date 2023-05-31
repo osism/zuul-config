@@ -5,9 +5,9 @@
       This pipeline will run jobs to verify registered cloud providers
       that they are scs compliant.
     manager: independent
-    trigger:
-      timer:
-        time: '*/5 * * * *'
+      trigger:
+        timer:
+          time: '*/5 * * * *'
     success:
       githubzuulapp:
         check: 'success'
