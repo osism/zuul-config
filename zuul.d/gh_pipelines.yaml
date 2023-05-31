@@ -1,13 +1,28 @@
 ---
 - pipeline:
+    name: compliance_check
+    description: |
+      This pipeline will run jobs to verify registered cloud providers
+      that they are scs compliant.
+    manager: independent
+    trigger:
+      timer:
+        time: '*/5 * * * *'
+    success:
+      githubzuulapp:
+        check: 'success'
+        comment: false
+    failure:
+      githubzuulapp:
+        check: 'failure'
+        comment: false
+
+- pipeline:
     name: check
     description: |
       Newly opened pull requests enter this pipeline to receive an
       initial check status.
     manager: independent
-    trigger:
-      timer:
-        time: '*/5 * * * *'
       githubzuulapp:
         - event: pull_request
           action:
