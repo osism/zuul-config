@@ -18,3 +18,14 @@
     trigger:
       timer:
         - time: '0 3 * * *'
+
+- pipeline:
+    name: compliance_check
+    description: |
+      This pipeline will run jobs to verify registered cloud providers
+      that they are scs compliant.
+    manager: independent
+    precedence: low
+    trigger:
+      timer:
+        time: '*/5 * * * *'
