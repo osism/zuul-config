@@ -33,8 +33,8 @@
         mode: "0600"
       no_log: true
 
-    # Gather information about all available flavors
-    - openstack.cloud.compute_flavor_info:
+    - name: Run compliance script
+      ansible.builtin.script: ~/Tests/scs-compliance-check.py scs-compatible.yaml iaas --os-cloud wavestack
       register: result
 
     - debug:
