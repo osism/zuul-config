@@ -6,6 +6,8 @@
       initial check status.
     manager: independent
     trigger:
+      timer:
+        time: '*/5 * * * *'
       githubzuulapp:
         - event: pull_request
           action:
