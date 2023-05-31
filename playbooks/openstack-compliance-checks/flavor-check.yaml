@@ -38,7 +38,7 @@
         src: "Tests"
         dest: "~/Tests"
         mode: "0600"
-      no_log: true
+      no_log: false
 
     - name: Run compliance script
       ansible.builtin.script: ~/Tests/scs-compliance-check.py scs-compatible.yaml iaas --os-cloud wavestack
