@@ -41,7 +41,7 @@
       no_log: false
 
     - name: Run compliance script
-      ansible.builtin.script: /home/ubuntu/Tests/scs-compliance-check.py scs-compatible.yaml iaas --os-cloud wavestack
+      ansible.builtin.script: ../../Tests/scs-compliance-check.py scs-compatible.yaml iaas --os-cloud wavestack
       register: result
 
     - debug:
