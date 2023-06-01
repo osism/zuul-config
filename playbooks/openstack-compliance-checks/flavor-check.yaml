@@ -33,15 +33,8 @@
         mode: "0600"
       no_log: true
 
-    - name: Copy Tests on the node
-      ansible.builtin.copy:
-        src: "../../Tests"
-        dest: "~/"
-        mode: "0777"
-      no_log: false
-
     - name: Run compliance script
-      ansible.builtin.script: ../../Tests/scs-compliance-check.py scs-compatible.yaml iaas --os-cloud wavestack
+      ansible.builtin.script: ../../Tests/scs-compliance-check.py ../../Tests/scs-compatible.yaml iaas --os-cloud wavestack
       register: result
 
     - debug:
