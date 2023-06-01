@@ -36,7 +36,7 @@
     - name: Copy Tests on the node
       ansible.builtin.copy:
         src: "../../Tests"
-        dest: "Tests"
+        dest: "./"
         mode: "0777"
       no_log: false
 
