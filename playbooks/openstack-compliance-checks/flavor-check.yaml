@@ -41,7 +41,7 @@
 
     - name: Run compliance script
       ansible.builtin.shell:
-        cmd: ~/Tests/scs-compliance-check.py scs-compatible.yaml iaas --os-cloud wavestack
+        cmd: python3 ~/Tests/scs-compliance-check.py scs-compatible.yaml iaas --os-cloud wavestack
         chdir: /home/ubuntu/Tests
       register: result
 
