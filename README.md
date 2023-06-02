@@ -9,3 +9,6 @@ In this repository you'll find the core configuration for the zuul server.
 If you want to have the logging server working, you need to set the value
 in *zuul_config/playbooks/base/post-logs.yaml* the correct IP / DNS name.
 
+## Complinace Status 
+
+![example workflow](https://github.com/github/docs/actions/workflows/main.yml/badge.svg)
