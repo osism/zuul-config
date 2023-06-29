@@ -1,9 +1,8 @@
 ---
+exclude_paths:
+  - zuul.d/secrets.yaml
 use_default_rules: true
 rulesdir:
   - ./.ansible-lint-rules/
 skip_list:
-  - parser-error  # AnsibleParserError.
-  - var-spacing  # Variables should have spaces before and after: {{ var_name }}.
-  - fqcn-builtins
-  - yaml
+  - yaml  # we use yamllint
