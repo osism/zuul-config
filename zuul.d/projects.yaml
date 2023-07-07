@@ -1,6 +1,6 @@
 ---
 - project:
-    name: master-caster/zuul-config
+    name: SovereignCloudStack/zuul-config
     default-branch: main
     merge-mode: "squash-merge"
     compliance_check:

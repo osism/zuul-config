@@ -11,4 +11,4 @@ in *zuul_config/playbooks/base/post-logs.yaml* the correct IP / DNS name.
 
 ## Complinace Status 
 
-![Wavestack](https://zuul.scs.community/api/tenant/osism-testbed/badge?project=master-caster/zuul-config&pipeline=compliance_check)
+![Wavestack](https://zuul.scs.community/api/tenant/osism-testbed/badge?project=SovereignCloudStack/zuul-config&pipeline=compliance_check)
