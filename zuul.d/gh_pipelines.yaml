@@ -5,6 +5,7 @@
       Newly opened pull requests enter this pipeline to receive an
       initial check status.
     manager: independent
+    trigger:
       githubzuulapp:
         - event: pull_request
           action:
