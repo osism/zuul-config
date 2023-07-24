@@ -7,4 +7,4 @@
     - add-build-sshkey
     - start-zuul-console
     - validate-host
-    - prepare-workspace
+    - prepare-workspace-log
