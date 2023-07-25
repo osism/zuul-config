@@ -3,6 +3,7 @@
 
 - name: Synchronize src repos to workspace directory.
   synchronize:
+    delay_updates: false
     delete: true
     dest: "{{ zuul_workspace_root }}"
     recursive: true
