@@ -38,6 +38,9 @@
     description: |
       A job to check if a IaaS provider is SCS compliance in
       terms of flavor names
+    secrets:
+      - name: clouds_conf
+        secret: app_credential_cloud_conf
     run: playbooks/openstack-compliance-checks/flavor-check.yaml
 
 - semaphore:
