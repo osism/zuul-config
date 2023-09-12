@@ -3,9 +3,10 @@
     name: SovereignCloudStack/zuul-config
     default-branch: main
     merge-mode: "squash-merge"
-    compliance_check:
-      jobs:
-        - openstack-scs-flavor-check
+# TODO: Uncomment this pipeline once the app_credential_cloud_conf secret, which is utilized by the openstack-scs-flavor-check job, has been renewed.
+#    compliance_check:
+#      jobs:
+#        - openstack-scs-flavor-check
     check:
       jobs:
         - noop
