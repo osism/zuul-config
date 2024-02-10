@@ -1,5 +1,17 @@
 ---
 - nodeset:
+    name: centos-9-stream
+    nodes:
+      - name: centos-9-stream
+        label: centos-9-stream
+
+- nodeset:
+    name: debian-bookworm
+    nodes:
+      - name: debian-bookworm
+        label: debian-bookworm
+
+- nodeset:
     name: ubuntu-jammy
     nodes:
       - name: ubuntu-jammy
