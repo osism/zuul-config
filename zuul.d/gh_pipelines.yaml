@@ -118,6 +118,7 @@
 
 - pipeline:
     name: label
+    post-review: true
     description: |
       Changes that have been approved by a trusted reviewer who labeled PR with the zuul label
     manager: independent
