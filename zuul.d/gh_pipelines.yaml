@@ -144,3 +144,32 @@
       github:
         check: cancelled
         comment: false
+
+- pipeline:
+    name: label-additional
+    post-review: true
+    description: |
+      Changes that have been approved by a trusted reviewer who labeled PR with the zuul-additional label
+    manager: independent
+    trigger:
+      github:
+        - event: pull_request
+          action: labeled
+          label:
+            - zuul-additional
+    start:
+      github:
+        check: 'in_progress'
+        comment: false
+    success:
+      github:
+        check: 'success'
+        comment: false
+    failure:
+      github:
+        check: 'failure'
+        comment: false
+    dequeue:
+      github:
+        check: cancelled
+        comment: false
