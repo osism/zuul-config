@@ -17,7 +17,7 @@
     roles:
       - zuul: zuul/zuul-jobs
     timeout: 1800
-    nodeset: ubuntu-jammy
+    nodeset: ubuntu-noble
 
 - job:
     name: base-extra-logs
