@@ -6,4 +6,4 @@
     - generate-zuul-manifest
     - role: upload-logs
       vars:
-        zuul_log_url: "https://logs.services.betacloud.xyz"
+        zuul_log_url: "https://logs.services.osism.tech"
