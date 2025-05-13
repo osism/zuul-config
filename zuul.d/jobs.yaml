@@ -15,7 +15,7 @@
       - playbooks/base/post.yaml
       - playbooks/base/post-logs.yaml
     roles:
-      - zuul: zuul/zuul-jobs
+      - zuul: osism/openinfra-zuul-jobs
     timeout: 1800
     nodeset: ubuntu-noble
 
