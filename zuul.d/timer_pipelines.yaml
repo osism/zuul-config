@@ -18,6 +18,7 @@
     trigger:
       timer:
         - time: '0 3 * * *'
+        - time: '0 12 * * *'
 
 - pipeline:
     name: periodic-midnight
@@ -27,3 +28,4 @@
     trigger:
       timer:
         - time: '0 0 * * *'
+        - time: '30 9 * * *'
