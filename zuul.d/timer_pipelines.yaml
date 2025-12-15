@@ -27,3 +27,14 @@
     trigger:
       timer:
         - time: '0 0 * * *'
+
+- pipeline:
+    name: periodic-weekly
+    description: This pipeline runs jobs once per week.
+    post-review: true
+    manager: independent
+    precedence: low
+    trigger:
+      timer:
+        # 5 is Saturday in apscheduler
+        - time: '0 6 * * 5'
