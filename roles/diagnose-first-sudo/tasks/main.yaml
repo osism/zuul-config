@@ -1,0 +1,60 @@
+---
+# Diagnostic role for the intermittent
+# "Timeout (32s) waiting for privilege escalation prompt" failures.
+# Order matters: probe sudo with strace BEFORE warming any caches via
+# getent / systemctl, so a cold-start hang is captured in the trace.
+- name: Ensure log directory exists
+  ansible.builtin.file:
+    path: "{{ ansible_user_dir }}/zuul-output/logs"
+    state: directory
+    mode: "0755"
+
+- name: Probe first sudo invocation under strace
+  ansible.builtin.shell: |
+    set +e
+    out={{ ansible_user_dir }}/zuul-output/logs/sudo-strace.log
+    : > "$out"
+    if command -v strace >/dev/null 2>&1; then
+      cmd=(timeout 40 strace -f -tt -T -y \
+           -o "$out" \
+           sudo -n true)
+    else
+      echo "strace not installed; running bare sudo probe" > "$out"
+      cmd=(timeout 40 sudo -n true)
+    fi
+    { TIMEFORMAT='WALL: %3R s'; time "${cmd[@]}"; } 2> "$out.time"
+    echo "EXIT: $?" >> "$out.time"
+  args:
+    executable: /bin/bash
+  failed_when: false
+
+- name: Snapshot DNS / PAM / logind state (no become)
+  ansible.builtin.shell: |
+    set +e
+    out={{ ansible_user_dir }}/zuul-output/logs/sudo-debug.txt
+    {
+      echo "== date ==";            date -Iseconds
+      echo "== uptime ==";          uptime
+      echo "== boot age (s) ==";    awk '{print int($1)}' /proc/uptime
+      echo "== /etc/hostname =="; cat /etc/hostname
+      echo "== /etc/hosts ==";      cat /etc/hosts
+      echo "== nsswitch.conf ==";   cat /etc/nsswitch.conf
+      echo "== resolv.conf ==";     cat /etc/resolv.conf 2>/dev/null
+      echo "== getent ahosts =="
+      getent ahosts "$(cat /etc/hostname)"
+      echo "== timed getent hosts =="
+      { TIMEFORMAT='getent: %3R s'; time getent hosts "$(cat /etc/hostname)"; } 2>&1
+      echo "== systemd-logind active =="
+      systemctl is-active systemd-logind
+      echo "== systemd-logind ActiveEnterTimestampMonotonic =="
+      systemctl show systemd-logind -p ActiveEnterTimestampMonotonic
+      echo "== systemd-resolved active =="
+      systemctl is-active systemd-resolved 2>/dev/null
+      echo "== /etc/pam.d/sudo =="
+      cat /etc/pam.d/sudo 2>/dev/null
+      echo "== sudoers.d listing =="
+      ls -la /etc/sudoers.d/ 2>/dev/null
+    } > "$out" 2>&1
+  args:
+    executable: /bin/bash
+  failed_when: false
