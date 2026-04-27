@@ -12,6 +12,7 @@
       It also sets a default timeout value (which may be overidden).
     pre-run: playbooks/base/pre.yaml
     post-run:
+      - playbooks/base/post-fetch.yaml
       - playbooks/base/post.yaml
       - playbooks/base/post-logs.yaml
     roles:
@@ -23,9 +24,6 @@
     name: base-extra-logs
     parent: base
     description: |
-      A base job variant with extra logs.
+      Compatibility alias for the base job.
 
-      In addition to the plain base job this collects extra logs,
-      docs and artifacts from all nodes.
-    post-run:
-      - playbooks/base/post-fetch.yaml
+      Log collection from all nodes is handled by the plain base job.
