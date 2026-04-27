@@ -24,6 +24,6 @@
     name: base-extra-logs
     parent: base
     description: |
-      Compatibility alias for the base job.
+      NOOP compatibility alias for the base job.
 
       Log collection from all nodes is handled by the plain base job.
