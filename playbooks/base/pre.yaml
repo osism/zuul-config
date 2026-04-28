@@ -8,4 +8,5 @@
     - start-zuul-console
     - validate-host
     - prepare-workspace-log
+    - ensure-output-dirs-present
     - diagnose-first-sudo

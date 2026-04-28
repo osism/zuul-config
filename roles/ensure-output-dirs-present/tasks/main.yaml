@@ -1,0 +1,15 @@
+---
+- name: Ensure Zuul output directories exist
+  ansible.builtin.file:
+    path: "{{ zj_zuul_output_dir }}/{{ zj_output_dir }}"
+    state: directory
+    mode: "0755"
+  loop:
+    - logs
+    - artifacts
+    - docs
+  loop_control:
+    loop_var: zj_output_dir
+  vars:
+    zj_zuul_output_dir: >-
+      {{ zuul_output_dir | default(ansible_user_dir ~ '/zuul-output') }}
