@@ -1,0 +1,10 @@
+---
+- name: Ensure hostname resolves locally
+  ansible.builtin.shell: |
+    set -o pipefail
+    grep -qE "^127\.0\.0\.1[[:space:]]+{{ ansible_hostname }}([[:space:]]|$)" /etc/hosts || \
+      printf '127.0.0.1 %s\n' "{{ ansible_hostname }}" | timeout 35 sudo -n tee -a /etc/hosts > /dev/null
+  args:
+    executable: /bin/bash
+  changed_when: false
+  failed_when: false
