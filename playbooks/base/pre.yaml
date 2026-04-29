@@ -9,4 +9,5 @@
     - validate-host
     - prepare-workspace-log
     - ensure-output-dirs-present
+    - ensure-hostname-resolves-locally
     - diagnose-first-sudo
