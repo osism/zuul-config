@@ -40,6 +40,12 @@
       echo "== /etc/hosts ==";      cat /etc/hosts
       echo "== nsswitch.conf ==";   cat /etc/nsswitch.conf
       echo "== resolv.conf ==";     cat /etc/resolv.conf 2>/dev/null
+      echo "== ping 8.8.8.8 =="
+      ping -c1 -W2 8.8.8.8 2>&1 || true
+      echo "== ping 81.163.194.9 =="
+      ping -c1 -W2 81.163.194.9 2>&1 || true
+      echo "== ping 81.163.194.10 =="
+      ping -c1 -W2 81.163.194.10 2>&1 || true
       echo "== getent ahosts =="
       getent ahosts "$(cat /etc/hostname)"
       echo "== timed getent hosts =="
