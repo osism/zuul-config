@@ -17,6 +17,7 @@
       - playbooks/base/post-logs.yaml
     roles:
       - zuul: osism/openinfra-zuul-jobs
+      - zuul: osism/zuul-jobs
     timeout: 1800
     nodeset: debian-bookworm
 
