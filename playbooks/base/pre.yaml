@@ -10,7 +10,3 @@
     - prepare-workspace-log
     - ensure-output-dirs-present
     - diagnose-first-sudo
-  tasks:
-    - name: Run the equivalent of "apt-get update" as a separate step
-      ansible.builtin.apt:
-        update_cache: yes
