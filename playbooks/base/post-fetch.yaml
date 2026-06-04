@@ -2,5 +2,11 @@
 - name: Base post-fetch
   hosts: all
   roles:
+    # Teardown network snapshot must run before fetch-output collects
+    # the node's logs. Runs on success and failure (post-run always
+    # runs), so it brackets the build window against the pre-run snapshot.
+    - role: diagnose-network
+      vars:
+        diagnose_network_phase: post
     - fetch-output
     - merge-output-to-logs

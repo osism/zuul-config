@@ -1,0 +1,24 @@
+---
+# Hosts that actually fail in the field and are worth probing on both
+# address families: tarballs.opendev.org (kolla source tarballs) and
+# galaxy.ansible.com (ansible-galaxy collections).
+diagnose_network_targets:
+  - tarballs.opendev.org
+  - galaxy.ansible.com
+
+# Output file suffix. The role is invoked twice: from base pre-run
+# (startup, phase "pre" -> net-debug.pre.txt) and from base post-run
+# (teardown, phase "post" -> net-debug.post.txt). Comparing the two
+# brackets the build window without any background polling.
+diagnose_network_phase: pre
+
+# Docker/BuildKit IPv6 diagnostics at teardown (phase "post" only). The
+# decisive ENETUNREACH was inside a BuildKit RUN namespace, which a
+# host-only snapshot can miss. Two parts: (1) the daemon/network IPv6
+# *config* (docker info, daemon.json, bridge EnableIPv6, buildx ls) --
+# deterministic and image-independent, the primary signal for "does
+# Docker hand out IPv6 at all"; (2) a best-effort exec probe inside a
+# container on the default bridge (a known base image if present, never
+# pulls) -- corroboration only, since the default bridge is not the
+# BuildKit RUN network.
+diagnose_network_container_probe: true

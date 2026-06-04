@@ -1,0 +1,191 @@
+---
+# Diagnostic role for the intermittent regiocloud-a CI egress failures.
+# Outbound connectivity to some destinations (e.g. tarballs.opendev.org)
+# drops intermittently, and WHICH address family fails varies over time:
+# IPv6 ENETUNREACH/timeouts were seen during the incident, while a later
+# probe found IPv4->tarballs ~50% loss with IPv6 healthy. So this role
+# captures BOTH families. The existing diagnose-first-sudo role only
+# probes IPv4 (8.8.8.8 + the v4 nameservers), so a node can read healthy
+# pre-run then fail on a real dual-stack fetch. This role adds the
+# missing IPv6 + real-destination probes.
+#
+# It is invoked twice with no background polling: at startup (base
+# pre-run, phase "pre") and at teardown (base post-run, phase "post",
+# which also runs when the job fails). The post pass additionally probes
+# a container network namespace, since one key failure (galaxy
+# ENETUNREACH) was inside a Docker BuildKit container. See
+# ~/issues/regiocloud/ipv6-egress-instability.md for the analysis.
+#
+# Everything is best-effort and must never fail or perturb a job:
+# set +e, guard every command, failed_when/changed_when false.
+- name: Ensure log directory exists
+  ansible.builtin.file:
+    path: "{{ ansible_user_dir }}/zuul-output/logs"
+    state: directory
+    mode: "0755"
+
+- name: Snapshot dual-stack network state ({{ diagnose_network_phase }})
+  ansible.builtin.shell: |
+    set +e
+    phase={{ diagnose_network_phase }}
+    out={{ ansible_user_dir }}/zuul-output/logs/net-debug.$phase.txt
+    targets="{{ diagnose_network_targets | join(' ') }}"
+    iface=$(ip -6 route show default 2>/dev/null \
+            | awk '{for(i=1;i<=NF;i++) if($i=="dev"){print $(i+1); exit}}')
+    : "${iface:=eth0}"
+    gw=$(ip -6 route show default 2>/dev/null \
+         | awk '{for(i=1;i<=NF;i++) if($i=="via"){print $(i+1); exit}}')
+    {
+      echo "== date ==";    date -Is
+      echo "== iface / gw =="; echo "iface=$iface gw=$gw"
+      echo "== ip -6 addr (lifetimes = SLAAC evidence) =="; ip -6 addr show
+      echo "== ip -6 route show =="; ip -6 route show
+      echo "== ip -6 route show default (expires/proto ra = RA evidence) =="
+      ip -6 route show default
+      echo "== ip -4 route show default =="; ip -4 route show default
+      echo "== sysctl accept_ra / forwarding =="
+      for k in all default "$iface"; do
+        sysctl "net.ipv6.conf.$k.forwarding" "net.ipv6.conf.$k.accept_ra" 2>&1
+      done
+      echo "== resolvectl status =="
+      if command -v resolvectl >/dev/null 2>&1; then resolvectl status 2>&1
+      else echo "resolvectl not installed"; fi
+      for d in $targets; do
+        echo "== target: $d =="
+        echo "-- getent ahosts (families glibc returns) --"
+        getent ahosts "$d" 2>&1
+        if command -v resolvectl >/dev/null 2>&1; then
+          echo "-- resolvectl query --"; resolvectl query --cache=no "$d" 2>&1
+        fi
+        v6=$(getent ahosts "$d" 2>/dev/null | awk '/:/{print $1; exit}')
+        v4=$(getent ahosts "$d" 2>/dev/null | awk '/\./{print $1; exit}')
+        if [ -n "$v6" ]; then
+          echo "-- ip -6 route get $v6 --"; ip -6 route get "$v6" 2>&1
+        fi
+        if [ -n "$v4" ]; then
+          echo "-- ip -4 route get $v4 --"; ip -4 route get "$v4" 2>&1
+        fi
+        echo "-- curl -6 --"
+        curl -6 -sS -m 10 -o /dev/null \
+          -w 'http=%{http_code} ip=%{remote_ip} t=%{time_total}s\n' \
+          "https://$d/" 2>&1 || echo "curl -6 FAILED"
+        echo "-- curl -4 --"
+        curl -4 -sS -m 10 -o /dev/null \
+          -w 'http=%{http_code} ip=%{remote_ip} t=%{time_total}s\n' \
+          "https://$d/" 2>&1 || echo "curl -4 FAILED"
+      done
+      echo "== ping -6 gateway =="
+      if [ -n "$gw" ]; then
+        ping -6 -c1 -W2 "${gw}%${iface}" 2>&1
+      else echo "no v6 gw"; fi
+      echo "== traceroute6 to first target =="
+      set -- $targets
+      if command -v traceroute6 >/dev/null 2>&1; then
+        timeout 30 traceroute6 -q1 -w2 "$1" 2>&1
+      else echo "traceroute6 not installed"; fi
+    } > "$out" 2>&1
+  args:
+    executable: /bin/bash
+  changed_when: false
+  failed_when: false
+
+# Teardown only: Docker/BuildKit IPv6 context. The decisive ENETUNREACH
+# was inside a BuildKit RUN namespace, not a plain `docker run`. The
+# primary, deterministic signal is the daemon/network IPv6 *config*
+# (image-independent): if Docker enables no IPv6, containers and builds
+# get no v6 route regardless of host RA health. A best-effort `docker
+# run` in a known base image corroborates from inside a container netns
+# -- but that is the default bridge, NOT the BuildKit RUN network, so it
+# only approximates the failing path. Faithfully reproducing the RUN
+# netns would need a throwaway `docker build`; left as follow-up.
+- name: Snapshot Docker/BuildKit IPv6 config (teardown)
+  ansible.builtin.shell: |
+    set +e
+    phase={{ diagnose_network_phase }}
+    out={{ ansible_user_dir }}/zuul-output/logs/net-debug.$phase.txt
+    {
+      echo "== docker / buildkit IPv6 config =="
+      if ! command -v docker >/dev/null 2>&1; then
+        echo "docker not available; skipped"
+      else
+        echo "-- docker info (IPv6 lines) --"
+        if info=$(docker info 2>&1); then
+          printf '%s\n' "$info" | grep -iE 'ipv6|ip6tables' \
+            || echo "(no IPv6 lines)"
+        else
+          echo "docker info FAILED (daemon down or no permission):"
+          printf '%s\n' "$info" | head -5
+        fi
+        echo "-- /etc/docker/daemon.json --"
+        cat /etc/docker/daemon.json 2>/dev/null || echo "(absent)"
+        echo "-- docker network inspect bridge (EnableIPv6 + IPAM) --"
+        docker network inspect bridge 2>&1 \
+          | grep -iE '"Name"|EnableIPv6|Subnet|Gateway' \
+          || echo "(inspect failed)"
+        echo "-- docker buildx ls --"
+        docker buildx ls 2>&1 || echo "(buildx unavailable)"
+      fi
+    } >> "$out" 2>&1
+  args:
+    executable: /bin/bash
+  when:
+    - diagnose_network_container_probe | bool
+    - diagnose_network_phase == "post"
+  changed_when: false
+  failed_when: false
+
+# Corroborating exec probe from inside a container netns (default
+# bridge). Best-effort: prefer a known base image, and report tool
+# availability so an unusable diagnostic image is not mistaken for a
+# network failure.
+- name: Probe container network namespace (teardown)
+  ansible.builtin.shell: |
+    set +e
+    phase={{ diagnose_network_phase }}
+    out={{ ansible_user_dir }}/zuul-output/logs/net-debug.$phase.txt
+    targets="{{ diagnose_network_targets | join(' ') }}"
+    {
+      echo "== container netns exec probe (default bridge) =="
+      if ! command -v docker >/dev/null 2>&1; then
+        echo "docker not available; skipped"
+      else
+        # Prefer a full base image likely to carry ip/curl/getent,
+        # skipping dangling (<none>) tags; fall back to any local image
+        # ID (a valid run reference). Never pull. (docker image ls
+        # columns: REPOSITORY TAG IMAGE_ID ...)
+        img=$(docker image ls 2>/dev/null | awk \
+          '$1~/^(ubuntu|debian)$/ && $2!="<none>"{print $1":"$2; exit}')
+        [ -z "$img" ] && img=$(docker image ls -q 2>/dev/null | head -1)
+        if [ -z "$img" ]; then
+          echo "no local image; skipped (will not pull over a broken network)"
+        else
+          echo "using local image $img"
+          docker run --rm "$img" sh -c '
+            echo "tools: ip=$(command -v ip || echo no)" \
+                 "curl=$(command -v curl || echo no)" \
+                 "getent=$(command -v getent || echo no)"
+            echo "-- ip -6 addr / route --"
+            (ip -6 addr show 2>/dev/null; ip -6 route show 2>/dev/null) \
+              || cat /proc/net/ipv6_route 2>/dev/null || echo "no ip tool"
+            echo "-- /etc/resolv.conf --"; cat /etc/resolv.conf 2>/dev/null
+            for d in '"$targets"'; do
+              echo "target $d:"
+              getent ahosts "$d" 2>&1 | head -4 || echo "  getent unavailable"
+              (curl -6 -sS -m 8 -o /dev/null \
+                 -w "  v6 %{http_code} %{remote_ip} t=%{time_total}\n" \
+                 "https://$d/" 2>&1 || echo "  v6 FAIL/unavailable")
+              (curl -4 -sS -m 8 -o /dev/null \
+                 -w "  v4 %{http_code} %{remote_ip} t=%{time_total}\n" \
+                 "https://$d/" 2>&1 || echo "  v4 FAIL/unavailable")
+            done
+          ' 2>&1
+        fi
+      fi
+    } >> "$out" 2>&1
+  args:
+    executable: /bin/bash
+  when:
+    - diagnose_network_container_probe | bool
+    - diagnose_network_phase == "post"
+  changed_when: false
+  failed_when: false
