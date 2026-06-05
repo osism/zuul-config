@@ -1,6 +1,9 @@
 ---
 exclude_paths:
   - zuul.d/secrets.yaml
+  - playbooks/base/             # base-job playbooks reference roles Zuul injects at runtime
+  - roles/prepare-workspace-log/ # uses the Zuul-only `zuul_console` module
 use_default_rules: true
 skip_list:
   - yaml  # we use yamllint
+  - role-name  # Zuul base-job roles use hyphenated names by convention
