@@ -26,6 +26,7 @@
     echo "EXIT: $?" >> "$out.time"
   args:
     executable: /bin/bash
+  changed_when: false
   failed_when: false
 
 - name: Snapshot DNS / PAM / logind state (no become)
@@ -63,4 +64,5 @@
     } > "$out" 2>&1
   args:
     executable: /bin/bash
+  changed_when: false
   failed_when: false
