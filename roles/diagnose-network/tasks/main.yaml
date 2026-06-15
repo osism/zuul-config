@@ -79,22 +79,29 @@
         # pre/post bracket. Bounded and in-line -- not a background sampler.
         for fam in 6 4; do
           echo "-- curl -$fam (3 attempts) --"
+          ok=0
           for n in 1 2 3; do
             curl -$fam -sS -m 10 -o /dev/null \
               -w "  #$n http=%{http_code} ip=%{remote_ip} t=%{time_total}s\n" \
-              "https://$d/" 2>&1 || echo "  #$n curl -$fam FAILED"
+              "https://$d/" 2>&1 && ok=1 || echo "  #$n curl -$fam FAILED"
           done
+          # Trace only the family that failed, to its resolved address:
+          # localises WHERE the failing path dies instead of tracing the
+          # healthy family. v4 via traceroute, v6 via traceroute6.
+          if [ "$ok" = 0 ]; then
+            addr=$v6; [ "$fam" = 4 ] && addr=$v4
+            tr=traceroute6; [ "$fam" = 4 ] && tr=traceroute
+            if [ -n "$addr" ] && command -v "$tr" >/dev/null 2>&1; then
+              echo "  !! curl -$fam failed 3x; $tr to $addr"
+              timeout 30 "$tr" -q1 -w2 "$addr" 2>&1
+            fi
+          fi
         done
       done
       echo "== ping -6 gateway =="
       if [ -n "$gw" ]; then
         ping -6 -c1 -W2 "${gw}%${iface}" 2>&1
       else echo "no v6 gw"; fi
-      echo "== traceroute6 to first target =="
-      set -- $targets
-      if command -v traceroute6 >/dev/null 2>&1; then
-        timeout 30 traceroute6 -q1 -w2 "$1" 2>&1
-      else echo "traceroute6 not installed"; fi
     } > "$out" 2>&1
   args:
     executable: /bin/bash
