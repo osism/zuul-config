@@ -57,8 +57,9 @@
         if command -v resolvectl >/dev/null 2>&1; then
           echo "-- resolvectl query --"; resolvectl query --cache=no "$d" 2>&1
         fi
-        v6=$(getent ahosts "$d" 2>/dev/null | awk '/:/{print $1; exit}')
-        v4=$(getent ahosts "$d" 2>/dev/null | awk '/\./{print $1; exit}')
+        v6=$(getent ahosts "$d" 2>/dev/null | awk '$1~/:/{print $1; exit}')
+        v4=$(getent ahosts "$d" 2>/dev/null \
+             | awk '$1~/^[0-9]+(\.[0-9]+){3}$/{print $1; exit}')
         if [ -n "$v6" ]; then
           echo "-- ip -6 route get $v6 --"; ip -6 route get "$v6" 2>&1
         fi
