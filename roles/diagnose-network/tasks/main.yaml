@@ -53,6 +53,11 @@
       echo "== resolvectl status =="
       if command -v resolvectl >/dev/null 2>&1; then resolvectl status 2>&1
       else echo "resolvectl not installed"; fi
+      echo "== /etc/resolv.conf (resolver stub) =="
+      cat /etc/resolv.conf 2>/dev/null || echo "(absent)"
+      echo "== /run/systemd/resolve/resolv.conf (upstreams) =="
+      cat /run/systemd/resolve/resolv.conf 2>/dev/null \
+        || echo "(no systemd-resolved upstream file)"
       for d in $targets; do
         echo "== target: $d =="
         echo "-- getent ahosts (families glibc returns) --"
