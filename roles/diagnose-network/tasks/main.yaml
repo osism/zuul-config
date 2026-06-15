@@ -109,21 +109,21 @@
         echo "docker not available; skipped"
       else
         echo "-- docker info (IPv6 lines) --"
-        if info=$(docker info 2>&1); then
+        if info=$(timeout 30 docker info 2>&1); then
           printf '%s\n' "$info" | grep -iE 'ipv6|ip6tables' \
             || echo "(no IPv6 lines)"
         else
-          echo "docker info FAILED (daemon down or no permission):"
+          echo "docker info FAILED/timed out (daemon down or no permission):"
           printf '%s\n' "$info" | head -5
         fi
         echo "-- /etc/docker/daemon.json --"
         cat /etc/docker/daemon.json 2>/dev/null || echo "(absent)"
         echo "-- docker network inspect bridge (EnableIPv6 + IPAM) --"
-        docker network inspect bridge 2>&1 \
+        timeout 30 docker network inspect bridge 2>&1 \
           | grep -iE '"Name"|EnableIPv6|Subnet|Gateway' \
           || echo "(inspect failed)"
         echo "-- docker buildx ls --"
-        docker buildx ls 2>&1 || echo "(buildx unavailable)"
+        timeout 30 docker buildx ls 2>&1 || echo "(buildx unavailable)"
       fi
     } >> "$out" 2>&1
   args:
@@ -153,14 +153,21 @@
         # skipping dangling (<none>) tags; fall back to any local image
         # ID (a valid run reference). Never pull. (docker image ls
         # columns: REPOSITORY TAG IMAGE_ID ...)
-        img=$(docker image ls 2>/dev/null | awk \
+        img=$(timeout 30 docker image ls 2>/dev/null | awk \
           '$1~/^(ubuntu|debian)$/ && $2!="<none>"{print $1":"$2; exit}')
-        [ -z "$img" ] && img=$(docker image ls -q 2>/dev/null | head -1)
+        if [ -z "$img" ]; then
+          img=$(timeout 30 docker image ls -q 2>/dev/null | head -1)
+        fi
         if [ -z "$img" ]; then
           echo "no local image; skipped (will not pull over a broken network)"
         else
           echo "using local image $img"
-          docker run --rm "$img" sh -c '
+          # Bound the whole probe: on the degraded node this role exists
+          # to diagnose, a wedged daemon can make `docker run` hang
+          # indefinitely and stall teardown. timeout keeps it best-effort.
+          # A killed client may orphan the container, but the node is torn
+          # down right after, so that is acceptable here.
+          timeout 60 docker run --rm "$img" sh -c '
             echo "tools: ip=$(command -v ip || echo no)" \
                  "curl=$(command -v curl || echo no)" \
                  "getent=$(command -v getent || echo no)"
