@@ -43,9 +43,12 @@
       echo "== ip -6 route show default (expires/proto ra = RA evidence) =="
       ip -6 route show default
       echo "== ip -4 route show default =="; ip -4 route show default
-      echo "== sysctl accept_ra / forwarding =="
+      echo "== accept_ra / forwarding (procfs; RA-suppression evidence) =="
       for k in all default "$iface"; do
-        sysctl "net.ipv6.conf.$k.forwarding" "net.ipv6.conf.$k.accept_ra" 2>&1
+        for s in forwarding accept_ra; do
+          v=$(cat "/proc/sys/net/ipv6/conf/$k/$s" 2>/dev/null)
+          echo "net.ipv6.conf.$k.$s = ${v:-<unavailable>}"
+        done
       done
       echo "== resolvectl status =="
       if command -v resolvectl >/dev/null 2>&1; then resolvectl status 2>&1
