@@ -105,6 +105,14 @@
     } > "$out" 2>&1
   args:
     executable: /bin/bash
+  # Hang backstop: cap the whole task so a wedged DNS/daemon call can
+  # never stall teardown before fetch-output. Sized above this task's
+  # bounded worst case (curl/traceroute timeouts) so it fires only on a
+  # genuine hang. The three post-phase tasks (300+120+180) sum to 600s,
+  # a third of the 1800s base job timeout, leaving room for fetch-output;
+  # failed_when:false swallows the async-timeout result.
+  async: 300
+  poll: 5
   changed_when: false
   failed_when: false
 
@@ -147,6 +155,8 @@
     } >> "$out" 2>&1
   args:
     executable: /bin/bash
+  async: 120  # hang backstop; see "Snapshot dual-stack network state"
+  poll: 5
   when:
     - diagnose_network_container_probe | bool
     - diagnose_network_phase == "post"
@@ -210,6 +220,8 @@
     } >> "$out" 2>&1
   args:
     executable: /bin/bash
+  async: 180  # hang backstop; see "Snapshot dual-stack network state"
+  poll: 5
   when:
     - diagnose_network_container_probe | bool
     - diagnose_network_phase == "post"
