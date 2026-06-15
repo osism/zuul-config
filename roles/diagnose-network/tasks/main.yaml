@@ -17,7 +17,7 @@
 # ~/issues/regiocloud/ipv6-egress-instability.md for the analysis.
 #
 # Everything is best-effort and must never fail or perturb a job:
-# set +e, guard every command, failed_when/changed_when false.
+# set +e / pipefail, guard every command, failed_when/changed_when false.
 - name: Ensure log directory exists
   ansible.builtin.file:
     path: "{{ ansible_user_dir }}/zuul-output/logs"
@@ -27,6 +27,7 @@
 - name: Snapshot dual-stack network state ({{ diagnose_network_phase }})
   ansible.builtin.shell: |
     set +e
+    set -o pipefail
     phase={{ diagnose_network_phase }}
     out={{ ansible_user_dir }}/zuul-output/logs/net-debug.$phase.txt
     targets="{{ diagnose_network_targets | join(' ') }}"
@@ -128,6 +129,7 @@
 - name: Snapshot Docker/BuildKit IPv6 config (teardown)
   ansible.builtin.shell: |
     set +e
+    set -o pipefail
     phase={{ diagnose_network_phase }}
     out={{ ansible_user_dir }}/zuul-output/logs/net-debug.$phase.txt
     {
@@ -170,6 +172,7 @@
 - name: Probe container network namespace (teardown)
   ansible.builtin.shell: |
     set +e
+    set -o pipefail
     phase={{ diagnose_network_phase }}
     out={{ ansible_user_dir }}/zuul-output/logs/net-debug.$phase.txt
     targets="{{ diagnose_network_targets | join(' ') }}"
