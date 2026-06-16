@@ -19,6 +19,7 @@
       - zuul: osism/openinfra-zuul-jobs
       - zuul: osism/zuul-jobs
     timeout: 1800
+    post-timeout: 1800
     nodeset: debian-bookworm
 
 - job:
