@@ -22,3 +22,31 @@ diagnose_network_phase: pre
 # pulls) -- corroboration only, since the default bridge is not the
 # BuildKit RUN network.
 diagnose_network_container_probe: true
+
+# Pre-run isolation gate (phase "pre" only).
+#
+# The probes above are pure observers. This gate is the one exception:
+# when the pre-run snapshot proves the node has no egress at all, it
+# fails the pre-run so Zuul retries the build on a different node.
+#
+# Why this is worth an exception. The isolation is per-node and lasts
+# the node's lifetime (the pre and post snapshots agree on affected
+# builds), so a fresh node is the only thing that helps -- and Zuul
+# retries a pre-run failure but never the run phase. Without this gate,
+# whether a build recovers for free or fails outright is decided by
+# whether its first network task happens to sit in a pre-run role,
+# which is an accident of role ordering rather than anything about the
+# fault. The verdict needed to decide it was already being computed
+# here and discarded, because every task in this role is
+# failed_when: false by design.
+#
+# Set to false on any job that must never be retried for this reason.
+diagnose_network_gate: true
+
+# Corroborating threshold, in seconds, for the hostname-resolution cost
+# recorded by the diagnose-first-sudo role ("getent: <n> s" in
+# sudo-debug.txt). Measured: healthy nodes ~0.01 s; isolated nodes 10 s
+# with systemd-resolved active (ubuntu-noble) or 80 s with it inactive
+# (debian-bookworm). Anything in between has never been observed, so
+# this only has to separate 0.01 from 10.
+diagnose_network_gate_getent_seconds: 5.0

@@ -230,3 +230,100 @@
     - diagnose_network_phase == "post"
   changed_when: false
   failed_when: false
+
+# ---------------------------------------------------------------------
+# Pre-run isolation gate. Everything above is a pure observer; these two
+# tasks are the deliberate exception. See defaults/main.yaml for why.
+#
+# Evidence comes from sudo-debug.txt, not from this role's own snapshot.
+# diagnose-first-sudo runs earlier in the same pre-run and has no async
+# cap, so its file is always complete -- whereas the snapshot above is
+# truncated by its own async budget on exactly the nodes this gate cares
+# about (measured 2026-09-08 on 090cbd65 and 9d056236: 6 "http=" lines
+# written before the 300 s cap fired, against 12 on a healthy node), so
+# any count taken from it is unreliable in the isolated case.
+#
+# sudo-debug.txt carries two complete, independent, bimodal signals:
+#   - three ping probes to raw IPs (8.8.8.8 and both resolvers), which
+#     need no DNS at all: 100% loss on all three when isolated, 0% loss
+#     and single-digit ms when healthy;
+#   - the cost of resolving the node's own hostname: ~0.01 s healthy,
+#     10 s or 80 s isolated, with nothing in between ever observed.
+#
+# The gate fails CLOSED (verdict "unknown" -> no abort) on every input it
+# cannot fully trust, because a false abort costs a whole retry cycle:
+# ping absent, fewer than three probes recorded, or a missing getent
+# timing all pass the build through unchanged. It aborts only on the
+# conjunction of both signals, and the truncated curl snapshot can still
+# veto that -- if any HTTPS probe did get a response, the verdict is
+# healthy regardless. Note that partial curl failure is NORMAL: on a
+# healthy node tarballs.opendev.org over IPv6 returns http=000 while
+# IPv4 returns 200, so only "nothing answered at all" means anything.
+# ---------------------------------------------------------------------
+- name: Evaluate node isolation verdict (pre-run gate)
+  ansible.builtin.shell: |
+    set +e
+    set -o pipefail
+    net={{ ansible_user_dir }}/zuul-output/logs/net-debug.pre.txt
+    sud={{ ansible_user_dir }}/zuul-output/logs/sudo-debug.txt
+
+    emit() {
+      echo "$1"
+      {
+        echo "== isolation gate =="
+        echo "$1"
+      } >> "$net" 2>/dev/null
+      exit 0
+    }
+
+    [ -s "$sud" ] \
+      || emit "VERDICT=unknown reason=no-sudo-debug-snapshot"
+
+    # (A) Raw-IP reachability, independent of DNS. Three targets, one
+    #     packet each; the role above writes one summary line per target.
+    probes=$(grep -cE '[0-9]+% packet loss' "$sud")
+    lost=$(grep -cE '100% packet loss' "$sud")
+    [ "$probes" -ge 3 ] \
+      || emit "VERDICT=unknown reason=too-few-ping-probes probes=$probes"
+    [ "$lost" -eq "$probes" ] \
+      || emit "VERDICT=healthy reason=ping-answered lost=$lost/$probes"
+
+    # (B) Cost of resolving the hostname of the node itself.
+    getent=$(awk '/^getent: /{print $2; exit}' "$sud" 2>/dev/null)
+    [ -n "$getent" ] \
+      || emit "VERDICT=unknown reason=no-getent-timing"
+    slow=$(awk -v g="$getent" -v t={{ diagnose_network_gate_getent_seconds }} \
+      'BEGIN {print (g + 0 >= t + 0) ? 1 : 0}')
+    [ "$slow" = 1 ] \
+      || emit "VERDICT=unknown reason=ping-dead-but-dns-fast getent=${getent}s"
+
+    # (C) Veto only: if any HTTPS probe above got a response, the node
+    #     has egress whatever ping and DNS say. Absent or truncated file
+    #     cannot block the verdict -- it just cannot veto it.
+    answered=$(grep -cE 'http=[1-5][0-9]{2}' "$net" 2>/dev/null)
+    [ "${answered:-0}" -eq 0 ] \
+      || emit "VERDICT=healthy reason=https-answered answered=$answered"
+
+    emit "VERDICT=isolated ping_lost=$lost/$probes getent=${getent}s"
+  args:
+    executable: /bin/bash
+  register: diagnose_network_gate_verdict
+  changed_when: false
+  failed_when: false
+  when:
+    - diagnose_network_gate | bool
+    - diagnose_network_phase == "pre"
+
+- name: Abort the pre-run on a fully isolated node
+  ansible.builtin.fail:
+    msg: >-
+      NODE ISOLATION GATE: aborting pre-run so Zuul retries this build on
+      another node. This node has no external connectivity
+      ({{ diagnose_network_gate_verdict.stdout | default('') | trim }}).
+      Not a defect in the change under test; see sudo-debug.txt and
+      net-debug.pre.txt in this build's logs.
+  when:
+    - diagnose_network_gate | bool
+    - diagnose_network_phase == "pre"
+    - diagnose_network_gate_verdict.stdout is defined
+    - "'VERDICT=isolated' in diagnose_network_gate_verdict.stdout"
