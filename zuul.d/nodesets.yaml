@@ -12,6 +12,12 @@
         label: debian-bookworm
 
 - nodeset:
+    name: debian-trixie
+    nodes:
+      - name: debian-trixie
+        label: debian-trixie
+
+- nodeset:
     name: ubuntu-jammy
     nodes:
       - name: ubuntu-jammy
