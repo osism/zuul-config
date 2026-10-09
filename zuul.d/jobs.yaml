@@ -20,7 +20,7 @@
       - zuul: osism/zuul-jobs
     timeout: 1800
     post-timeout: 1800
-    nodeset: debian-bookworm
+    nodeset: debian-trixie
 
 - job:
     name: base-extra-logs
