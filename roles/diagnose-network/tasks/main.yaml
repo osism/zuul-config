@@ -24,6 +24,25 @@
     state: directory
     mode: "0755"
 
+# Teardown only: skip the post probes on a node the pre-run gate already
+# found isolated. Isolation lasts the node's lifetime, so a second capped
+# snapshot (~5 min) would only repeat net-debug.pre.txt.
+- name: Read pre-run isolation verdict (teardown)
+  ansible.builtin.shell: |
+    set +e
+    logs={{ ansible_user_dir }}/zuul-output/logs
+    if grep -q 'VERDICT=isolated' "$logs/net-debug.pre.txt" 2>/dev/null; then
+      echo "skipped: pre-run gate found this node isolated," \
+           "see net-debug.pre.txt" > "$logs/net-debug.post.txt"
+      echo isolated
+    fi
+  args:
+    executable: /bin/bash
+  register: diagnose_network_pre_verdict
+  changed_when: false
+  failed_when: false
+  when: diagnose_network_phase == "post"
+
 - name: Snapshot dual-stack network state ({{ diagnose_network_phase }})
   ansible.builtin.shell: |
     set +e
@@ -114,6 +133,8 @@
   # failed_when:false swallows the async-timeout result.
   async: 300
   poll: 5
+  when:
+    - diagnose_network_pre_verdict.stdout | default('') != 'isolated'
   changed_when: false
   failed_when: false
 
@@ -162,6 +183,7 @@
   when:
     - diagnose_network_container_probe | bool
     - diagnose_network_phase == "post"
+    - diagnose_network_pre_verdict.stdout | default('') != 'isolated'
   changed_when: false
   failed_when: false
 
@@ -228,6 +250,7 @@
   when:
     - diagnose_network_container_probe | bool
     - diagnose_network_phase == "post"
+    - diagnose_network_pre_verdict.stdout | default('') != 'isolated'
   changed_when: false
   failed_when: false
 
