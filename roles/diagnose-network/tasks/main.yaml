@@ -43,8 +43,9 @@
   failed_when: false
   when: diagnose_network_phase == "post"
 
-# Interface, route and resolver state. Local reads only, so it is cheap
-# and complete even on an isolated node, and runs before the gate.
+# Interface, route and resolver state, plus IPv6 egress by literal
+# address. Bounded to a few seconds, so it is complete even on an
+# isolated node, and runs before the gate.
 - name: Record interface and resolver state ({{ diagnose_network_phase }})
   ansible.builtin.shell: |
     set +e
@@ -79,6 +80,17 @@
       echo "== /run/systemd/resolve/resolv.conf (upstreams) =="
       cat /run/systemd/resolve/resolv.conf 2>/dev/null \
         || echo "(no systemd-resolved upstream file)"
+      # IPv6 egress without DNS: the resolvers are IPv4, so on an isolated
+      # node every curl -6 fails at name resolution and never tests the v6
+      # path. The IPv4 counterpart (8.8.8.8, resolvers) is in sudo-debug.txt.
+      echo "== ping -6 gateway =="
+      if [ -n "$gw" ]; then
+        ping -6 -c1 -W2 "${gw}%${iface}" 2>&1
+      else echo "no v6 gw"; fi
+      for a in {{ diagnose_network_ipv6_literals | join(' ') }}; do
+        echo "== ping -6 $a =="
+        ping -6 -c1 -W2 "$a" 2>&1
+      done
     } > "$out" 2>&1
   args:
     executable: /bin/bash
@@ -197,11 +209,6 @@
     phase={{ diagnose_network_phase }}
     out={{ ansible_user_dir }}/zuul-output/logs/net-debug.$phase.txt
     targets="{{ diagnose_network_targets | join(' ') }}"
-    iface=$(ip -6 route show default 2>/dev/null \
-            | awk '{for(i=1;i<=NF;i++) if($i=="dev"){print $(i+1); exit}}')
-    : "${iface:=eth0}"
-    gw=$(ip -6 route show default 2>/dev/null \
-         | awk '{for(i=1;i<=NF;i++) if($i=="via"){print $(i+1); exit}}')
     {
       for d in $targets; do
         echo "== target: $d =="
@@ -243,10 +250,6 @@
           fi
         done
       done
-      echo "== ping -6 gateway =="
-      if [ -n "$gw" ]; then
-        ping -6 -c1 -W2 "${gw}%${iface}" 2>&1
-      else echo "no v6 gw"; fi
     } >> "$out" 2>&1
   args:
     executable: /bin/bash

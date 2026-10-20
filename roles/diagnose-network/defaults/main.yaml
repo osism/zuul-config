@@ -6,6 +6,12 @@ diagnose_network_targets:
   - tarballs.opendev.org
   - galaxy.ansible.com
 
+# Public IPv6 addresses pinged without DNS (Google and Cloudflare public
+# resolvers), to tell whether an isolated node still has IPv6 egress.
+diagnose_network_ipv6_literals:
+  - "2001:4860:4860::8888"
+  - "2606:4700:4700::1111"
+
 # Output file suffix. The role is invoked twice: from base pre-run
 # (startup, phase "pre" -> net-debug.pre.txt) and from base post-run
 # (teardown, phase "post" -> net-debug.post.txt). Comparing the two
